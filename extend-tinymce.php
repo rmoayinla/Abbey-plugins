@@ -47,8 +47,8 @@ class Abbey_TinyMce_Extended {
 		$this->add_mce_styles( array("title" => __( "Panels Body", "abbey-plugins" ),"block" => "div","classes" => "panel-body", "wrapper" => true ) );
 		$this->add_mce_styles( array("title" => __( "Panels Footer", "abbey-plugins" ),"block" => "div","classes" => "panel-footer", "wrapper" => true ) );
 		$this->add_mce_styles( array("title" => __( "Button", "abbey-plugins" ),"selector" => "a[href]","classes" => "btn btn-default" ) );
-		$this->add_mce_styles( array("title" => __( "Large Button", "abbey-plugins" ),"selector" => "a[href]","classes" => "btn btn-default btn-lg" ) );
-
+		$this->add_mce_styles( array("title" => __( "Large Button", "abbey-plugins" ),"selector" => "a[href], button","classes" => "btn btn-default btn-lg" ) );
+		$this->add_mce_styles( array("title" => __( "More button", "abbey-plugins" ),"classes" => "more-button", "inline" => "button" ) );
 		$style_formats = apply_filters( "abbey_mce_styles", $this->style_formats );
 
 		$init_array[ "style_formats" ] = json_encode( $style_formats );
