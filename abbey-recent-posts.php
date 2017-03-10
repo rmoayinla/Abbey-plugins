@@ -46,31 +46,39 @@ class Abbey_Recent_Posts extends WP_Widget{
 		$id = $post->ID;
 		$post_type = $post->post_type;
 		$args = [ 	"no_found_rows" => true, "post_type" => $post_type, 
-					"posts_per_page" => 3, "post__not_in" => array( $id ) 
+					"posts_per_page" => 3, "post__not_in" => array( $id ), 
+					'update_post_term_cache' => false, 'update_post_meta_cache' => false
 				];
 		$recent_posts = new WP_Query( $args );
 		?>
 		<?php if( $recent_posts->have_posts() ) : ?>
 			<div class="abbey-recent-posts">
 			<?php while( $recent_posts->have_posts() ) : $recent_posts->the_post(); ?>
-				<a class="thumbnail thumbnail-post" href="<?php the_permalink(); ?>">
+				<div class="thumbnail thumbnail-post">
 					<div class="row">
 						<?php if( has_post_thumbnail() ) : ?>
-							<figure class="col-md-3 post-thumbnail-image"><?php the_post_thumbnail(); ?></figure>
-							<div class="col-md-9 post-thumbnail-content">
+							<figure class="col-md-4 post-thumbnail-image"><?php the_post_thumbnail(); ?></figure>
+							<div class="col-md-8 post-thumbnail-content">
 						<?php else : ?>
 							<div class="col-md-12">
 						<?php endif; ?>
-								<h4 class="post-thumbnail-title"><?php the_title(); ?></h4>
+								<h4 class="post-thumbnail-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
 								<time><?php the_time( get_option( 'date_format' ) ); ?></time>
-								<button class='btn btn-link popup-post' data-post-id="<?php the_ID(); ?>" 
-									data-post-type="<?php echo get_post_type(); ?>" data-url = "<?php echo admin_url( "admin-ajax.php" )?>" >
-									<?php _e( "View in popup", "abbey-recent-posts" ); ?> 
-								</button>
-
 							</div>
-					</div>
-				</a>
+						
+						<footer class='icons-footer'>
+							<button class="btn btn-link dropdown-toggle" data-toggle="dropdown"><span class="fa fa-ellipsis-v"></span></button>
+							<ul class="dropdown-menu">
+								<li> 
+									<a class='popup-post' data-post-id="<?php the_ID(); ?>" data-post-type="<?php echo get_post_type(); ?>" 
+												data-url = "<?php echo admin_url( "admin-ajax.php" )?>" href="" >
+										<?php _e( "View in popup", "abbey-recent-posts" ); ?> 
+									</a>
+								</li>
+							</ul>
+						</footer>
+					</div><!--.row closes -->
+				</div><!-- thumbnail post closes-->
 			<?php 	endwhile; wp_reset_postdata(); ?>
 			</div>
 			<?php endif;
@@ -87,30 +95,35 @@ class Abbey_Recent_Posts extends WP_Widget{
 		$popup_post = new WP_Query(["no_found_rows" => true, "post_type" => $post_type, "p" => $post_id ]);
 		?>
 		<?php if( $popup_post->have_posts() ) : while( $popup_post->have_posts() ):  $popup_post->the_post();?>
-			<div class="single-post-panel">
-				<header class="entry-header">
-					<h1 class="post-title" itemprop="headline"><?php the_title(); ?></h1>
-					<ul class="breadcrumb post-info"><?php abbey_post_info(); ?></ul>
-				</header><!-- #page-content-header closes -->
+			<?php $html = wp_cache_get( $post_id, 'arp_popup_posts' ); ?>
+			<?php if( !$html ) : ?>
+				<?php ob_start(); ?>
+				<div class="single-post-panel">
+					<header class="entry-header">
+						<h1 class="post-title" itemprop="headline"><?php the_title(); ?></h1>
+						<ul class="breadcrumb post-info"><?php abbey_post_info(); ?></ul>
+					</header><!-- #page-content-header closes -->
 
-				<section class="post-entry">
-					<?php if( $has_thumbnail ) : ?>
-					<figure class="post-thumbnail" itemprop="image">
-						<?php the_post_thumbnail( "large" ); ?> 
-					</figure>
-					<figcaption class="post-thumbnail-caption">
-						<?php the_post_thumbnail_caption(); ?>
-					</figcaption>
-					<?php endif; ?>
+					<section class="post-entry">
+						<?php if( has_post_thumbnail() ) : ?>
+						<figure class="post-thumbnail" itemprop="image">
+							<?php the_post_thumbnail( "large" ); ?> 
+						</figure>
+						<figcaption class="post-thumbnail-caption">
+							<?php the_post_thumbnail_caption(); ?>
+						</figcaption>
+						<?php endif; ?>
 
-					<article <?php abbey_post_class(); ?> id="post-<?php the_ID(); ?>">
-						<?php the_content(); ?>
-						<div><?php abbey_post_pagination(); ?> </div>
-					</article>
-				</section><!-- .post-entry closes -->
-			
-		</div>
-	<?php endwhile; endif; 
+						<article <?php abbey_post_class(); ?> id="post-<?php the_ID(); ?>">
+							<?php the_content(); ?>
+							<div><?php abbey_post_pagination(); ?> </div>
+						</article>
+					</section><!-- .post-entry closes -->
+				
+			</div>
+			<?php $html = ob_get_clean(); wp_cache_add( $post_id, $html, "arp_popup_posts" ); ?>
+		<?php endif; echo $html; 
+		endwhile;  endif; 
 
 		wp_die();
 
