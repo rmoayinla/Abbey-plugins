@@ -33,6 +33,8 @@ class Abbey_Recent_Posts extends WP_Widget{
 	     </p>	<?php
 	}
 	function widget( $args, $instance ){
+		if( is_page() )
+			return; 
 		$before_widget = ( isset( $args["before_widget"] ) ) ? $args["before_widget"] : "<aside class='widget abbey_recent_posts_widget'>";
 		$after_widget = ( isset( $args["after_widget"] ) ) ? $args["after_widget"] : "</aside>";
 		$before_title = ( isset( $args["before_title"] ) ) ? $args["before_title"] : "<h4 class='widget-title'>";

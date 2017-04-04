@@ -23,6 +23,8 @@ class Abbey_Author_Widget extends WP_Widget {
 	}
 
 	public function widget( $args, $instance ){
+		if( is_page() || is_home() )
+			return;
 		$before_widget = ( isset( $args["before_widget"] ) ) ? $args["before_widget"] : "";
 		$after_widget = ( isset( $args["after_widget"] ) ) ? $args["after_widget"] : "";
 		$before_title = ( isset( $args["before_title"] ) ) ? $args["before_title"] : "";
