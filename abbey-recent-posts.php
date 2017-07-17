@@ -49,7 +49,7 @@ class Abbey_Recent_Posts extends WP_Widget{
 		$post_type = $post->post_type;
 		$args = [ 	"no_found_rows" => true, "post_type" => $post_type, 
 					"posts_per_page" => 3, "post__not_in" => array( $id ), 
-					'update_post_term_cache' => false, 'update_post_meta_cache' => false
+					'update_post_term_cache' => false, 'update_post_meta_cache' => false, 'cache_results' => false
 				];
 		$recent_posts = new WP_Query( $args );
 		?>
