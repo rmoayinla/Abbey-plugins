@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 * Plugin Name: Abbey Recent Posts 
 * Plugin URI: 
 * Description: Use this plugins with my theme
@@ -8,9 +8,17 @@
 * Version: 0.1
 * Text Domain: abbey-recent-posts
 * Github Plugin URI: 
+*
+*
+* Display recent posts in single posts and post_type pages 
+*
+* The plugin can be tweaked via a plugin admin page to determine recent post no, widget title etc
+* the styling for this plugin comes with abbey theme, will work on adding a custom styling css file 
+*
 */
 
 class Abbey_Recent_Posts extends WP_Widget{
+	
 	public function __construct(){
 		parent::__construct( "abbey_recent_posts", __( "Abbey Recent Posts", "abbey-recent-posts"), 
 				array( 
@@ -23,8 +31,9 @@ class Abbey_Recent_Posts extends WP_Widget{
 
 		add_action ( "wp_ajax_abbey_recent_posts", array ( $this, "popup_post" ) );
 	}
+
 	function form( $instance ){
-		$title = ( isset( $instance["title"] ) ) ? $instance["title"] : "Default title";
+		$title = ( isset( $instance["title"] ) ) ? $instance["title"] : __( "Recent posts", "abbey-recent-posts" );
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
@@ -32,9 +41,9 @@ class Abbey_Recent_Posts extends WP_Widget{
 	    	name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
 	     </p>	<?php
 	}
+
 	function widget( $args, $instance ){
-		if( is_page() )
-			return; 
+		if( is_page() ) return; 
 		$before_widget = ( isset( $args["before_widget"] ) ) ? $args["before_widget"] : "<aside class='widget abbey_recent_posts_widget'>";
 		$after_widget = ( isset( $args["after_widget"] ) ) ? $args["after_widget"] : "</aside>";
 		$before_title = ( isset( $args["before_title"] ) ) ? $args["before_title"] : "<h4 class='widget-title'>";
@@ -43,6 +52,7 @@ class Abbey_Recent_Posts extends WP_Widget{
 		echo $before_widget.$before_title.apply_filters( "widget_title", $instance["title"] ).$after_title;
 		echo $this->content().$after_widget;
 	}
+
 	function content(){
 		global $post;
 		$id = $post->ID;
@@ -56,15 +66,17 @@ class Abbey_Recent_Posts extends WP_Widget{
 		<?php if( $recent_posts->have_posts() ) : ?>
 			<div class="abbey-recent-posts">
 			<?php while( $recent_posts->have_posts() ) : $recent_posts->the_post(); ?>
-				<div class="thumbnail thumbnail-post">
+				<?php $thumbnail = abbey_page_media( "", "", false ); ?>
+				<div class="thumbnail-post">
 					<div class="row">
-						<?php if( has_post_thumbnail() ) : ?>
-							<figure class="col-md-4 post-thumbnail-image"><?php the_post_thumbnail(); ?></figure>
+						<?php if( !empty( $thumbnail ) ) : ?>
+							<figure class="col-md-4 post-thumbnail-image"><?php echo $thumbnail; ?></figure>
 							<div class="col-md-8 post-thumbnail-content">
 						<?php else : ?>
 							<div class="col-md-12">
 						<?php endif; ?>
-								<h4 class="post-thumbnail-title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h4>
+								<h4 class="post-thumbnail-title">
+									<a href="<?php the_permalink(); ?>" class><?php the_title(); ?></a></h4>
 								<time><?php the_time( get_option( 'date_format' ) ); ?></time>
 							</div>
 						
@@ -134,6 +146,7 @@ class Abbey_Recent_Posts extends WP_Widget{
 	function enqueJs(){
 		wp_enqueue_script( "abbey-recent-posts", plugin_dir_url( __FILE__ )."/recent-posts.js", array( "jquery" ), 1.0, true );
 	}
+
 	function update( $new_instance, $old_instance ){
 		$instance = array();
 		$instance["title"] = ( isset($new_instance["title"] ) ) ? strip_tags( $new_instance["title"] ) : "";
