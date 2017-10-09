@@ -57,9 +57,14 @@ class Abbey_Recent_Posts extends WP_Widget{
 		global $post;
 		$id = $post->ID;
 		$post_type = $post->post_type;
-		$args = [ 	"no_found_rows" => true, "post_type" => $post_type, 
-					"posts_per_page" => 3, "post__not_in" => array( $id ), 
-					'update_post_term_cache' => false, 'update_post_meta_cache' => false, 'cache_results' => false
+		$args = [ 	
+					"no_found_rows" => true, 
+					"post_type" => $post_type, 
+					"posts_per_page" => 3, 
+					"post__not_in" => array( $id ), 
+					'update_post_term_cache' => false, 
+					'update_post_meta_cache' => false, 
+					'cache_results' => false
 				];
 		$recent_posts = new WP_Query( $args );
 		?>
@@ -76,7 +81,10 @@ class Abbey_Recent_Posts extends WP_Widget{
 							<div class="col-md-12">
 						<?php endif; ?>
 								<h4 class="post-thumbnail-title">
-									<a href="<?php the_permalink(); ?>" class><?php the_title(); ?></a></h4>
+									<a href="<?php the_permalink(); ?>" title="<?php esc_html_e( "Continue reading", "abbey-recent-posts" ); ?>">
+										<?php the_title(); ?>
+									</a>
+								</h4>
 								<time><?php the_time( get_option( 'date_format' ) ); ?></time>
 							</div>
 						
