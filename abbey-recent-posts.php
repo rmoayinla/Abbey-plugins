@@ -19,29 +19,58 @@
 
 class Abbey_Recent_Posts extends WP_Widget{
 	
+	/**
+	 * Class constructor
+	 * called when an instance of this class object is instantiated 
+	 * this method calls the parent class (WP_Widget) and set the widget name and description 
+	 * enqueues styles and scripts for the recent posts plugin
+	 * hook into wp_ajax_ methods to load posts via Ajax 
+	 *@since: 1.0
+	 */
 	public function __construct(){
-		parent::__construct( "abbey_recent_posts", __( "Abbey Recent Posts", "abbey-recent-posts"), 
-				array( 
-					"description" => __( "This widget display the post author info", "abbey-recent-posts" )
-				) 
+		
+		//call the parent widget and provide widget name and description //
+		parent::__construct( 
+					"abbey_recent_posts", 
+					__( "Abbey Recent Posts", "abbey-recent-posts"), 
+					array( 
+						"description" => __( "This widget display the post author info", "abbey-recent-posts" )
+					) 
 		);
+
+		//load the main plugin javascript, needed for sending AJAX //
 		add_action ( "wp_enqueue_scripts", array ( $this, "enqueJS" ) );
 
+		/**
+		 * Hook into wp_ajax_ hooks to load posts via AJAX into popup 
+		 */
 		add_action ( "wp_ajax_nopriv_abbey_recent_posts", array ( $this, "popup_post" ) );
-
 		add_action ( "wp_ajax_abbey_recent_posts", array ( $this, "popup_post" ) );
 	}
 
+	/**
+	 * Widget form in the admin dashboard 
+	 * All settings fields for the widget have to be provided here
+	 * settings can include title for widget, number of posts to show etc 
+	 */
 	function form( $instance ){
 		$title = ( isset( $instance["title"] ) ) ? $instance["title"] : __( "Recent posts", "abbey-recent-posts" );
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:'); ?></label>
+
 	    	<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" 
-	    	name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
+	    		name="<?php echo $this->get_field_name('title'); ?>" type="text" 
+	    		value="<?php echo esc_attr( $title ); ?>" 
+	    	/>
 	     </p>	<?php
 	}
 
+	/**
+	 * Displays the actual widget content in the front end 
+	 *@param: 	$args 		array 		array of argument from the theme display_sidebar 
+	 * 			$instance 	array 		array of widget settings set in the admin dashboard 
+	 */
 	function widget( $args, $instance ){
 		if( is_page() ) return; 
 		$before_widget = ( isset( $args["before_widget"] ) ) ? $args["before_widget"] : "<aside class='widget abbey_recent_posts_widget'>";
@@ -67,43 +96,16 @@ class Abbey_Recent_Posts extends WP_Widget{
 					'cache_results' => false
 				];
 		$recent_posts = new WP_Query( $args );
+		//bail if we dont have any recent posts //
+		if( !$recent_posts->have_posts() ) return; 
 		?>
-		<?php if( $recent_posts->have_posts() ) : ?>
-			<div class="abbey-recent-posts">
+		<div class="abbey-recent-posts">
 			<?php while( $recent_posts->have_posts() ) : $recent_posts->the_post(); ?>
-				<?php $thumbnail = abbey_page_media( "", "", false ); ?>
-				<div class="thumbnail-post">
-					<div class="row">
-						<?php if( !empty( $thumbnail ) ) : ?>
-							<figure class="col-md-4 post-thumbnail-image"><?php echo $thumbnail; ?></figure>
-							<div class="col-md-8 post-thumbnail-content">
-						<?php else : ?>
-							<div class="col-md-12">
-						<?php endif; ?>
-								<h4 class="post-thumbnail-title">
-									<a href="<?php the_permalink(); ?>" title="<?php esc_html_e( "Continue reading", "abbey-recent-posts" ); ?>">
-										<?php the_title(); ?>
-									</a>
-								</h4>
-								<time><?php the_time( get_option( 'date_format' ) ); ?></time>
-							</div>
-						
-						<footer class='icons-footer'>
-							<button class="btn btn-link dropdown-toggle" data-toggle="dropdown"><span class="fa fa-ellipsis-v"></span></button>
-							<ul class="dropdown-menu">
-								<li> 
-									<a class='popup-post' data-post-id="<?php the_ID(); ?>" data-post-type="<?php echo get_post_type(); ?>" 
-												data-url = "<?php echo admin_url( "admin-ajax.php" )?>" href="" >
-										<?php _e( "View in popup", "abbey-recent-posts" ); ?> 
-									</a>
-								</li>
-							</ul>
-						</footer>
-					</div><!--.row closes -->
-				</div><!-- thumbnail post closes-->
+				<?php load_template( trailingslashit( plugin_dir_path( __FILE__ ) )."partials/thumbnail-post.php", false ); ?>
+
 			<?php 	endwhile; wp_reset_postdata(); ?>
-			</div>
-			<?php endif;
+		</div>
+		<?php 
 	}
 
 	function popup_post(){
