@@ -101,7 +101,8 @@ class Abbey_Recent_Posts extends WP_Widget{
 		?>
 		<div class="abbey-recent-posts">
 			<?php while( $recent_posts->have_posts() ) : $recent_posts->the_post(); ?>
-				<?php load_template( trailingslashit( plugin_dir_path( __FILE__ ) )."partials/thumbnail-post.php", false ); ?>
+
+				<?php load_template( trailingslashit( plugin_dir_path( __FILE__ ) )."partials/recent-post.php", false ); ?>
 
 			<?php 	endwhile; wp_reset_postdata(); ?>
 		</div>
@@ -144,7 +145,7 @@ class Abbey_Recent_Posts extends WP_Widget{
 						</article>
 					</section><!-- .post-entry closes -->
 				
-			</div>
+				</div>
 			<?php $html = ob_get_clean(); wp_cache_add( $post_id, $html, "arp_popup_posts" ); ?>
 		<?php endif; echo $html; 
 		endwhile;  endif; 
